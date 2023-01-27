@@ -6,7 +6,7 @@
 #    By: hsebille <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/01/25 14:40:36 by hsebille          #+#    #+#              #
-#    Updated: 2023/01/26 13:40:42 by hsebille         ###   ########.fr        #
+#    Updated: 2023/01/27 19:25:40 by hsebille         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -18,7 +18,7 @@ MLX_FLAG = -L minilibx-linux -lmlx -lX11 -lXext -lm -lz
 
 NAME = so_long
 
-SRCS = so_long.c get_next_line.c \
+SRCS = so_long.c get_next_line.c map.c can_move.c \
 
 OBJS = $(SRCS:.c=.o)
 
