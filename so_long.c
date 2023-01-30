@@ -6,73 +6,53 @@
 /*   By: hsebille <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/25 15:35:47 by hsebille          #+#    #+#             */
-/*   Updated: 2023/01/27 20:40:23 by hsebille         ###   ########.fr       */
+/*   Updated: 2023/01/30 21:25:23 by hsebille         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "so_long.h"
 
-void	close_window(t_data *data)
+void	init_vars(t_data *data)
 {
-	mlx_destroy_window(data->mlx, data->win);
-	mlx_destroy_image(data->mlx, data->ground);
-	mlx_destroy_image(data->mlx, data->wall);
-	mlx_destroy_image(data->mlx, data->player1);
-	mlx_destroy_display(data->mlx);
-	free(data->mlx);
-	exit(0);
-}
-
-int	keybind(int keycode, t_data *data)
-{
-	if (keycode == XK_Escape)
-		close_window(data);
-	else if ((keycode == XK_w || keycode == XK_Up) && can_move(*data))
-	{
-		mlx_put_image_to_window(data->mlx,
-			data->win, data->ground, data->px, data->py);
-		mlx_put_image_to_window(data->mlx,
-			data->win, data->player4, data->px, data->py - 64);
-		data->py -= 64;
-	}
-	else if ((keycode == XK_s || keycode == XK_Down) && can_move2(*data))
-	{
-		mlx_put_image_to_window(data->mlx,
-			data->win, data->ground, data->px, data->py);
-		mlx_put_image_to_window(data->mlx,
-			data->win, data->player1, data->px, data->py + 64);
-		data->py += 64;
-	}
-	else if ((keycode == XK_d || keycode == XK_Right) && can_move3(*data))
-	{
-		mlx_put_image_to_window(data->mlx,
-			data->win, data->ground, data->px, data->py);
-		mlx_put_image_to_window(data->mlx,
-			data->win, data->player3, data->px + 64, data->py);
-		data->px += 64;
-	}
-	else if ((keycode == XK_a || keycode == XK_Left) && can_move4(*data))
-	{
-		mlx_put_image_to_window(data->mlx,
-			data->win, data->ground, data->px, data->py);
-		mlx_put_image_to_window(data->mlx,
-			data->win, data->player2, data->px - 64, data->py);
-		data->px -= 64;
-	}
-	return (0);
+	data->x = 0;
+	data->y = 0;
+	data->mvmt_count = 0;
+	data->xmap = ft_strlen(data->mapping[0]);
+	data->ymap = 0;
+	while (data->mapping[data->ymap])
+		data->ymap++;
 }
 
 int	main(int argc, char **argv)
 {
-	(void)argc;
-	(void)argv;
 	t_data	data;
+	int		checker;
 
-	data.x = 0;
-	data.y = 0;
+	if (argc != 2)
+	{
+		write(2, "Error: invalid arguments.\n", 26);
+		return (1);
+	}
+	checker = read_map(argv, &data);
+	if (checker < 0)
+	{
+		if (checker == -1)
+			close_window(&data);
+		else
+			write(2, "Error: bad inputs.\n", 19);
+		return (1);
+	}
+	init_vars(&data);
 	data.mlx = mlx_init();
-	data.win = mlx_new_window (data.mlx, 960, 320, "so_long");
-	map_parsing(argv, &data);
-	mlx_hook(data.win, 2, (1L << 0), keybind, &data);
+	data.win = mlx_new_window(data.mlx, data.xmap * 64,
+			data.ymap * 64, argv[0]);
+	checker = draw_map(&data);
+	if (checker < 0)
+	{
+		write(2, "Error: No path found.\n", 22);
+		close_game(&data);
+	}
+	mlx_hook(data.win, 2, (1L << 0), gameplay, &data);
+	mlx_hook(data.win, 17, 4, mouse_close, &data);
 	mlx_loop(data.mlx);
 }
